@@ -30,13 +30,13 @@ class HospitalParserTest {
 	@Autowired
 	HospitalService hospitalService;
 
-	@Test
-	void deleteAndCount() {
-		hospitalDto.deleteAll();
-		int cnt = hospitalDto.getCount();
-
-		System.out.println(cnt);
-	}
+//	@Test
+//	void deleteAndCount() {
+//		hospitalDto.deleteAll();
+//		int cnt = hospitalDto.getCount();
+//
+//		System.out.println(cnt);
+//	}
 
 	@Test
 	void addAndCount() {
@@ -67,8 +67,8 @@ class HospitalParserTest {
 		//시작시간
 		long startTime = System.currentTimeMillis();
 
-//		hospitalDto.deleteAll();
-//		assertEquals(0, hospitalDto.getCount());
+		hospitalDto.deleteAll();
+		assertEquals(0, hospitalDto.getCount());
 
 		//대용량 데이터 파일
 		String fileName = "D:\\workspace\\전국_병의원_정보.csv";

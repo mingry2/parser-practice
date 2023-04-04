@@ -1,4 +1,16 @@
-# 📌 전국 병/의원 대용량 데이터 가공
+# 📌 전국 병/의원 대용량 데이터 처리
+
+## ✅ 병/의원 데이터
+* 데이터 출처: <a href="https://www.localdata.go.kr/devcenter/dataDown.do?menuNo=20001">LOCAL DATA</a>
+* 약 11만 건의 전국 병/의원 정보 데이터 .csv 파일
+* 대용량 데이터를 원하는 정보만으로 가공하여 DB에 Insert 할 수 있다.
+
+![](img/파일.png)
+
+## ✅ DB Table
+* 데이터 파일의 많은 컬럼 중 아래의 컬럼으로 DB 테이블 구성
+
+![](img/table설계.png)
 
 ## ✅ 프로젝트 빌드
 ```
@@ -8,59 +20,24 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 ```
 
-## ✅ 한 줄씩 Insert
+## 🛠 데이터 파싱(가공)
+### `readByLine()` 메서드로 데이터 파일 한 줄씩 읽어오기
+* <a href="https://github.com/mingry2/parser-practice/blob/main/src/main/java/com/example/parser/parser/ReadLineContext.java">ReadLineContext.java</a>
+* 'Buffer(버퍼)'를 사용하는 `BufferedReader` 클래스로 입력 효율을 높여줄 수 있다.
+* 파싱 중 가져오는 컬럼에 null 값이 있는 경우는 Excepion으로 에러를 넘겨 읽어오는 데이터에서 제외 시킨다.
 
-### 1. 데이터 가공
-* 파일에서 필요한 데이터만 뽑아 형식에 맞게 가공하여 Hospital 객체 생성
+### `parse()` 메서드로 읽어온 한 줄의 데이터를 파싱
+* `Parser<Hospital>`에 `parse()` 메서드를 사용하여 `,` 를 기준으로 데이터를 나눈다.
 
-```java
-@Component
-public class HospitalParser implements Parser<Hospital>{
+### 파싱 된 데이터 `hospitals` 리스트에 `.add`
 
-	@Override
-	public Hospital parse(String line) {
-        //"," 기준으로 나눠서 한줄씩 담는다.
-		String[] row = line.split("\",\""); 
-
-		Hospital hospital = new Hospital();
-
-        //파일 첫번째 row에 " 가 하나더 붙어있음(주의!)
-		hospital.setId(Integer.parseInt(row[0].replace("\"","")));
-		hospital.setOpenServiceName(row[1]);
-		hospital.setOpenLocalGovernmentCode(Integer.parseInt(row[3]));
-		hospital.setManagementNumber(row[4]);
-
-        //date 는 . 으로 연결되어있기 때문에 나눠주는 작업 추가
-		int year = Integer.parseInt(row[5].substring(0, 4));
-		int month = Integer.parseInt(row[5].substring(4, 6));
-		int day = Integer.parseInt(row[5].substring(6, 8));
-		hospital.setLicenseDate(LocalDateTime.of(year, month, day, 0, 0, 0));
-
-		hospital.setBusinessStatus(Integer.parseInt(row[7]));
-		hospital.setBusinessStatusCode(Integer.parseInt(row[9]));
-		hospital.setPhone(row[15]);
-		hospital.setFullAddress(row[18]);
-		hospital.setRoadNameAddress(row[19]);
-		hospital.setHospitalName(row[21]);
-		hospital.setBusinessTypeName(row[25]);
-		hospital.setHealthcareProviderCount(Integer.parseInt(row[29]));
-		hospital.setPatientRoomCount(Integer.parseInt(row[30]));
-		hospital.setTotalNumberOfBeds(Integer.parseInt(row[31]));
-		hospital.setTotalAreaSize(Float.parseFloat(row[32]));
-
-		return hospital;
-
-	}
-
-}
-````
-
-### 2. 가공된 데이터 `jdbc template` 사용하여 db insert
-
+## 🛠 `jdbcTemplate.update()`로 DB Insert(한줄씩 Insert)
 ```java
 @Component
 public class HospitalDto {
@@ -105,47 +82,20 @@ public class HospitalDto {
 	}
 }
 ```
+* 총 insert 시간
 
-### 3. Test 코드 작성하여 insert 진행
-> 한 줄씩 insert
-```java
-@Test
-@DisplayName("전국 병/의원 데이터 DB Insert")
-void addDb() throws IOException {
-
-    //시작시간
-    long startTime = System.currentTimeMillis();
-
-    hospitalDto.deleteAll();
-    assertEquals(0, hospitalDto.getCount());
-
-    //대용량 데이터 파일
-    String fileName = "D:\\workspace\\전국_병의원_정보.csv";
-
-    //DB에 Insert 된 정보 row 수
-    int cnt = this.hospitalService.insertLargeVolumeHospitalData(fileName);
-    System.out.println(cnt);
-
-    //파싱 후 list에 담기
-    List<Hospital> hospitals = hospitalReadLineContext.readByLine(fileName);
-
-    //종료시간
-    long endTime = System.currentTimeMillis();
-
-    //소요된 시간
-    long totalTime = (endTime - startTime) / 1000;
-    System.out.println("Total Time: " + totalTime + "초");
-
-    assertTrue(hospitals.size() > 1000);
-    assertTrue(hospitals.size() > 10000);
-}
-```
-* 총 111,919건 insert
+![](img/총시간.png)
+* insert 된 데이터 수
 
 ![](img/카운트.png)
 
-* 총 걸린 시간 약 8분
+### 💡 약 11만 건의 데이터를 Insert 할 때 `jdbcTemplate.update()`를 사용하면 Insert 시간이 오래걸림
 
-![](img/총시간.png)    
+## 🛠 `jdbcTemplate.batchUpdate()`로 DB Insert(일괄 Insert)
+* <a href="https://github.com/mingry2/parser-practice/blob/main/src/main/java/com/example/parser/domain/dto/HospitalDto.java">HospitalDto.java</a>
+* `jdbcTemplate.batchUpdate()` 사용 시 동일한 건수인데도 총 시간이 현저히 줄어든것을 확인할 수 있음
 
-## ✅ JDBC Batch 사용하여 일괄 Insert
+![](img/배치.png)
+* DB Insert
+
+![](img/데이터베이스 카운트.png)

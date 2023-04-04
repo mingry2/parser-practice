@@ -1,6 +1,6 @@
-package com.example.parser.parser;
+package com.example.parser;
 
-import com.example.parser.domain.entity.Hospital;
+import com.example.domain.entity.Hospital;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 

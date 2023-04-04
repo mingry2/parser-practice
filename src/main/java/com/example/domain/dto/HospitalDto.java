@@ -1,6 +1,7 @@
-package com.example.parser.domain.dto;
+package com.example.domain.dto;
 
-import com.example.parser.domain.entity.Hospital;
+import com.example.domain.entity.Hospital;
+import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -9,14 +10,13 @@ import org.springframework.stereotype.Component;
 public class HospitalDto {
 	private final JdbcTemplate jdbcTemplate;
 
-
 	public HospitalDto(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	//insert
-	public void add(Hospital hospital) {
-		String sql ="INSERT INTO `parser-db`.`hospital` \n" +
+	public void add(List<Hospital> hospitals) {
+		String sql ="INSERT INTO `parser_db`.`hospital` \n" +
 				"(`id`, `open_service_name`, `open_local_government_code`, `management_number`, `license_date`, " +
 				"`business_status`, `business_status_code`, `phone`, `full_address`, `road_name_address`, `hospital_name`, " +
 				"`business_type_name`, `healthcare_provider_count`, `patient_room_count`, `total_number_of_beds`, `total_area_size`) \n" +
@@ -27,24 +27,25 @@ public class HospitalDto {
 				"?,?,?," +
 				"?);";
 
-		this.jdbcTemplate.update(sql,
-				hospital.getId(),
-				hospital.getOpenServiceName(),
-				hospital.getOpenLocalGovernmentCode(),
-				hospital.getManagementNumber(),
-				hospital.getLicenseDate(),
-				hospital.getBusinessStatus(),
-				hospital.getBusinessStatusCode(),
-				hospital.getPhone(),
-				hospital.getFullAddress(),
-				hospital.getRoadNameAddress(),
-				hospital.getHospitalName(),
-				hospital.getBusinessTypeName(),
-				hospital.getHealthcareProviderCount(),
-				hospital.getPatientRoomCount(),
-				hospital.getTotalNumberOfBeds(),
-				hospital.getTotalAreaSize()
-		);
+		//batchUpdate(query, 저장할 데이터의 collection, batch 처리할 크기, ParameterizedPreparedStatementSetter)
+		jdbcTemplate.batchUpdate(sql, hospitals, 100, (ps, hospital) -> {
+			ps.setInt(1, hospital.getId());
+			ps.setString(2, hospital.getOpenServiceName());
+			ps.setInt(3, hospital.getOpenLocalGovernmentCode());
+			ps.setString(4, hospital.getManagementNumber());
+			ps.setString(5, hospital.getLicenseDate().toString());
+			ps.setInt(6, hospital.getBusinessStatus());
+			ps.setInt(7, hospital.getBusinessStatusCode());
+			ps.setString(8, hospital.getPhone());
+			ps.setString(9, hospital.getFullAddress());
+			ps.setString(10, hospital.getRoadNameAddress());
+			ps.setString(11, hospital.getHospitalName());
+			ps.setString(12, hospital.getBusinessTypeName());
+			ps.setInt(13, hospital.getHealthcareProviderCount());
+			ps.setInt(14, hospital.getPatientRoomCount());
+			ps.setInt(15, hospital.getTotalNumberOfBeds());
+			ps.setFloat(16, hospital.getTotalAreaSize());
+		});
 	}
 
 	RowMapper<Hospital> rowMapper = (rs, rowNum) -> {

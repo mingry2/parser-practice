@@ -1,8 +1,8 @@
-package com.example.parser.service;
+package com.example.service;
 
-import com.example.parser.domain.dto.HospitalDto;
-import com.example.parser.domain.entity.Hospital;
-import com.example.parser.parser.ReadLineContext;
+import com.example.parser.ReadLineContext;
+import com.example.domain.dto.HospitalDto;
+import com.example.domain.entity.Hospital;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,36 +23,28 @@ public class HospitalService {
 		this.hospitalDto = hospitalDto;
 	}
 
-	@Transactional
+//	@Transactional
 	public int insertLargeVolumeHospitalData(String fileName) {
 		log.trace("Insert large volume hospital data.");
 
 		int cnt = 0;
 		try {
-
 			List<Hospital> hospitals = readLineContext.readByLine(fileName);
-
-			for (Hospital hospital : hospitals) {
-				log.debug("Hospital: {}", hospital);
-				try {
-
-					this.hospitalDto.add(hospital);
-					cnt++;
-
-				} catch (Exception e) {
-
-					log.error("id:%d 레코드에 문제가 있습니다.",hospital.getId());
-					throw new RuntimeException(e);
-
-				}
+			log.debug("Hospitals size: {}", hospitals.size());
+			try {
+				this.hospitalDto.add(hospitals);
+				cnt++;
+			} catch (Exception e) {
+				log.error("Exception: {}", e);
+				throw new RuntimeException(e);
 			}
 
 		} catch (IOException e) {
-
+			log.error("IOException: {}", e);
 			throw new RuntimeException(e);
-
 		}
 		return cnt;
+
 	}
 
 }

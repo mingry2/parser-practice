@@ -1,7 +1,7 @@
-package com.example.parser.controller;
+package com.example.controller;
 
-import com.example.parser.domain.dto.HospitalDto;
-import com.example.parser.domain.entity.Hospital;
+import com.example.domain.dto.HospitalDto;
+import com.example.domain.entity.Hospital;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

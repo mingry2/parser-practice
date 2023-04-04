@@ -1,4 +1,4 @@
-package com.example.parser.domain.entity;
+package com.example.domain.entity;
 
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -27,6 +27,5 @@ public class Hospital {
 	private int patientRoomCount; //입원실수
 	private int totalNumberOfBeds; //병상수
 	private float totalAreaSize; //총면적
-
 }
 

@@ -1,6 +1,6 @@
-package com.example.parser.parser;
+package com.example.parser;
 
-import com.example.parser.domain.entity.Hospital;
+import com.example.domain.entity.Hospital;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

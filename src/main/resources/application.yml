@@ -1,5 +1,4 @@
-# ?? ?? ??
+# 로그 레벨 설정
 logging:
   level:
-    com: debug
-
+    root: debug

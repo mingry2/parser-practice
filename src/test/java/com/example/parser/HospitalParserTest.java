@@ -1,20 +1,22 @@
-package com.example.parser.parser;
+package com.example.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.example.parser.domain.dto.HospitalDto;
-import com.example.parser.domain.entity.Hospital;
-import com.example.parser.service.HospitalService;
+import com.example.domain.dto.HospitalDto;
+import com.example.domain.entity.Hospital;
+import com.example.service.HospitalService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Slf4j
 @SpringBootTest
 class HospitalParserTest {
 
@@ -26,19 +28,18 @@ class HospitalParserTest {
 	@Autowired
 	HospitalDto hospitalDto;
 
-
 	@Autowired
 	HospitalService hospitalService;
 
-//	@Test
-//	void deleteAndCount() {
-//		hospitalDto.deleteAll();
-//		int cnt = hospitalDto.getCount();
-//
-//		System.out.println(cnt);
-//	}
-
 	@Test
+	void deleteAndCount() {
+		hospitalDto.deleteAll();
+		int cnt = hospitalDto.getCount();
+
+		System.out.println(cnt);
+	}
+
+//	@Test
 	void addAndCount() {
 		HospitalParser hp = new HospitalParser();
 
@@ -48,7 +49,7 @@ class HospitalParserTest {
 
 		Hospital hospital = hp.parse(line1);
 
-		hospitalDto.add(hospital);
+//		hospitalDto.add(hospital);
 
 		Hospital selected = hospitalDto.findById(hospital.getId());
 
@@ -61,8 +62,7 @@ class HospitalParserTest {
 
 	@Test
 	@DisplayName("전국 병/의원 데이터 DB Insert")
-	void
-	addDb() throws IOException {
+	void addDb() throws IOException {
 
 		//시작시간
 		long startTime = System.currentTimeMillis();
@@ -75,7 +75,9 @@ class HospitalParserTest {
 
 		//DB에 Insert 된 정보 row 수
 		int cnt = this.hospitalService.insertLargeVolumeHospitalData(fileName);
-		System.out.println(cnt);
+		log.debug("Count: {}", cnt);
+
+		int resultCount = hospitalDto.getCount();
 
 		//파싱 후 list에 담기
 		List<Hospital> hospitals = hospitalReadLineContext.readByLine(fileName);
@@ -86,12 +88,13 @@ class HospitalParserTest {
 		//소요된 시간
 		long totalTime = (endTime - startTime) / 1000;
 		System.out.println("Total Time: " + totalTime + "초");
+		System.out.println("Count: " + resultCount + "개");
 
 		assertTrue(hospitals.size() > 1000);
 		assertTrue(hospitals.size() > 10000);
 	}
 
-	@Test
+//	@Test
 	@DisplayName(".csv 1줄 hospital로 잘 만드는지 테스트")
 	void convertToHospital() {
 		HospitalParser hp = new HospitalParser();

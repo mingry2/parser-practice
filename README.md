@@ -98,4 +98,4 @@ public class HospitalDto {
 ![](img/배치.png)
 * DB Insert
 
-![](img/데이터베이스 카운트.png)
+![](img/데이터베이스카운트.png)

@@ -12,7 +12,7 @@
 
 ![](img/table설계.png)
 
-## ✅ 프로젝트 빌드
+## ✅ 프로젝트  빌드
 ```
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
